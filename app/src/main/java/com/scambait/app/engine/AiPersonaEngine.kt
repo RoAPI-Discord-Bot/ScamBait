@@ -3,8 +3,19 @@ package com.scambait.app.engine
 enum class PersonaType {
     MARGARET,
     ARTHUR,
+    NAVY_SEAL,
     CUSTOM
 }
+
+enum class AiAction {
+    HANG_UP,
+    NONE
+}
+
+data class PersonaResponse(
+    val spokenText: String,
+    val actions: List<AiAction>
+)
 
 class AiPersonaEngine(
     var personaType: PersonaType = PersonaType.MARGARET,
@@ -32,12 +43,19 @@ class AiPersonaEngine(
         "Wait, what is a web browser? Is that the blue 'E' or the colored ball? I usually just click the picture of the mail envelope."
     )
 
+    private val navySealResponses = listOf(
+        "What the did you just say to me, you little scammer? I have over 300 confirmed call blocks in my sector! State your location now!",
+        "Listen to me very carefully. You are talking to a classified operator. If you call this number again, I will trace this line instantly!",
+        "Negative! I am not giving you any verification code! Drop your script and terminate this transmission immediately! [HANG_UP]",
+        "You are wasting tactical network bandwidth! This call is terminated! Out! [HANG_UP]"
+    )
+
     private var responseIndex = 0
 
-    fun generateResponse(scammerInput: String): String {
+    fun generateResponse(scammerInput: String): PersonaResponse {
         conversationHistory.add("Scammer" to scammerInput)
 
-        val response = when (personaType) {
+        val rawResponse = when (personaType) {
             PersonaType.MARGARET -> {
                 val res = margaretResponses[responseIndex % margaretResponses.size]
                 responseIndex++
@@ -48,13 +66,33 @@ class AiPersonaEngine(
                 responseIndex++
                 res
             }
+            PersonaType.NAVY_SEAL -> {
+                val res = navySealResponses[responseIndex % navySealResponses.size]
+                responseIndex++
+                res
+            }
             PersonaType.CUSTOM -> {
-                "Oh, excuse me dear... $scammerInput... could you repeat that slower? My glasses are foggy."
+                if (customPrompt.contains("[HANG_UP]")) {
+                    "This automated session is completed. Disconnecting call! [HANG_UP]"
+                } else {
+                    "Oh, excuse me dear... $scammerInput... could you repeat that slower?"
+                }
             }
         }
 
-        conversationHistory.add("AI Persona" to response)
-        return response
+        conversationHistory.add("AI Persona" to rawResponse)
+
+        val actions = mutableListOf<AiAction>()
+        if (rawResponse.contains("[HANG_UP]")) {
+            actions.add(AiAction.HANG_UP)
+        }
+
+        val cleanSpokenText = rawResponse.replace("[HANG_UP]", "").trim()
+
+        return PersonaResponse(
+            spokenText = cleanSpokenText,
+            actions = actions
+        )
     }
 
     fun getHistory(): List<Pair<String, String>> = conversationHistory.toList()
@@ -64,3 +102,4 @@ class AiPersonaEngine(
         responseIndex = 0
     }
 }
+

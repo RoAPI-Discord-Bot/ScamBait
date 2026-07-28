@@ -64,16 +64,24 @@ class ScamTrapService : LifecycleService() {
         startForegroundServiceNotification()
     }
 
+    private var pendingHangUp = false
+
     private fun setupEngines() {
         sttEngine.onSpeechRecognized = { transcribedText ->
             Log.d("ScamTrapService", "Scammer said: $transcribedText")
-            val aiResponse = aiPersonaEngine.generateResponse(transcribedText)
-            Log.d("ScamTrapService", "AI response: $aiResponse")
-            ttsEngine.speak(aiResponse)
+            val personaResponse = aiPersonaEngine.generateResponse(transcribedText)
+            Log.d("ScamTrapService", "AI response: ${personaResponse.spokenText}")
+
+            pendingHangUp = personaResponse.actions.contains(com.scambait.app.engine.AiAction.HANG_UP)
+            ttsEngine.speak(personaResponse.spokenText)
         }
 
         ttsEngine.onSpeechCompleted = {
-            if (_isCallActive.value) {
+            if (pendingHangUp) {
+                pendingHangUp = false
+                Log.i("ScamTrapService", "AI command triggered HANG_UP. Ending call now.")
+                endCurrentCall()
+            } else if (_isCallActive.value) {
                 sttEngine.startListening()
             }
         }
@@ -106,8 +114,9 @@ class ScamTrapService : LifecycleService() {
             currentRecordingFile = callRecorder.startRecording(callerNumber)
 
             // Initial AI Greeting
-            val initialGreeting = aiPersonaEngine.generateResponse("Hello")
-            ttsEngine.speak(initialGreeting)
+            val initialResponse = aiPersonaEngine.generateResponse("Hello")
+            pendingHangUp = initialResponse.actions.contains(com.scambait.app.engine.AiAction.HANG_UP)
+            ttsEngine.speak(initialResponse.spokenText)
         }
     }
 

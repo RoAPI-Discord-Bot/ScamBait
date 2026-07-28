@@ -115,7 +115,8 @@ fun PersonaSettingsScreen(
             listOf(
                 "MARGARET" to "Margaret (78 y/o Grandma - Confused, slow, stalls scammer)",
                 "ARTHUR" to "Arthur (81 y/o Senior - Tech impaired, talks about modem)",
-                "CUSTOM" to "Custom Prompt Persona"
+                "NAVY_SEAL" to "Commander Jack (Navy Seal - Aggressive, yelling, hangs up call with [HANG_UP])",
+                "CUSTOM" to "Custom Prompt Persona (Use [HANG_UP] to auto-disconnect call)"
             ).forEach { (key, label) ->
                 Card(
                     modifier = Modifier
