@@ -25,6 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.scambait.app.data.db.AppDatabase
 import com.scambait.app.data.repository.SettingsRepository
+import com.scambait.app.service.ScamTrapConnectionService
 import com.scambait.app.service.ScamTrapService
 import com.scambait.app.ui.screens.CallDetailScreen
 import com.scambait.app.ui.screens.ForwardingGuideScreen
@@ -57,6 +58,9 @@ class MainActivity : ComponentActivity() {
     ) { permissions ->
         val audioGranted = permissions[Manifest.permission.RECORD_AUDIO] ?: false
         if (audioGranted) {
+            // Register our VoIP-only PhoneAccount so the OS routes TextFree-forwarded calls
+            // ONLY to ScamBait — regular cellular calls are unaffected.
+            ScamTrapConnectionService.registerPhoneAccount(this)
             startScamService()
         }
     }
