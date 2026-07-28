@@ -105,14 +105,14 @@ fun ForwardingGuideScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "How Conditional Forwarding Works",
+                        text = "Pixel 8a Native Cellular Protection",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = PrimaryNeon
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "When a scammer calls your personal number, tap DECLINE. Your carrier automatically redirects ONLY declined or spam-blocked calls to your custom ScamBait SIP bot without ringing your line.",
+                        text = "ScamBait uses Android's Call Screening API directly on your Pixel 8a to intercept unknown callers on your personal Verizon number — zero carrier setup or forwarding required!",
                         fontSize = 13.sp,
                         color = TextSecondary
                     )

@@ -26,6 +26,8 @@ class SettingsRepository(private val context: Context) {
         val SIP_USERNAME = stringPreferencesKey("sip_username")
         val SIP_SERVER = stringPreferencesKey("sip_server")
         val SIP_PASSWORD = stringPreferencesKey("sip_password")
+        val AI_ENGINE_TYPE = stringPreferencesKey("ai_engine_type")
+        val GEMINI_API_KEY = stringPreferencesKey("gemini_api_key")
     }
 
     val isTrapActive: Flow<Boolean> = context.dataStore.data.map { prefs ->
@@ -66,6 +68,21 @@ class SettingsRepository(private val context: Context) {
 
     val sipPassword: Flow<String> = context.dataStore.data.map { prefs ->
         prefs[SIP_PASSWORD] ?: ""
+    }
+
+    val aiEngineType: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[AI_ENGINE_TYPE] ?: "RULE_BASED"
+    }
+
+    val geminiApiKey: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[GEMINI_API_KEY] ?: ""
+    }
+
+    suspend fun setAiEngineConfig(type: String, apiKey: String) {
+        context.dataStore.edit { prefs ->
+            prefs[AI_ENGINE_TYPE] = type
+            prefs[GEMINI_API_KEY] = apiKey
+        }
     }
 
     suspend fun setTrapActive(active: Boolean) {

@@ -209,6 +209,82 @@ fun HomeScreen(
                 }
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // System Permissions & Setup Cards
+            val context = LocalContext.current
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, GlassBorder, RoundedCornerShape(16.dp)),
+                colors = CardDefaults.cardColors(containerColor = Color(0x1F1E293B)),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Required Pixel 8a Setup",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = PrimaryNeon
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Grant these 2 system settings so ScamBait can auto-answer and hang up on your cellular number:",
+                        fontSize = 12.sp,
+                        color = TextSecondary
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = "1. Call Screening Role", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                            Text(text = "Allows app to catch calls before ringing", fontSize = 11.sp, color = TextSecondary)
+                        }
+                        Button(
+                            onClick = {
+                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                                    val roleManager = context.getSystemService(android.content.Context.ROLE_SERVICE) as? android.app.role.RoleManager
+                                    val intent = roleManager?.createRequestRoleIntent(android.app.role.RoleManager.ROLE_CALL_SCREENING)
+                                    if (intent != null) context.startActivity(intent)
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0x3338BDF8)),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(text = "Enable", color = PrimaryNeon, fontSize = 12.sp)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = "2. Auto-Hangup Accessibility", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                            Text(text = "Allows bot to tap 'End Call' automatically", fontSize = 11.sp, color = TextSecondary)
+                        }
+                        Button(
+                            onClick = {
+                                val intent = android.content.Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                                context.startActivity(intent)
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0x3338BDF8)),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(text = "Open Settings", color = PrimaryNeon, fontSize = 12.sp)
+                        }
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(20.dp))
 
             // Test Simulation Button

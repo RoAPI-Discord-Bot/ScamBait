@@ -162,6 +162,69 @@ fun PersonaSettingsScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // AI Model Engine Choice
+            Text(
+                text = "AI Brain Engine",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            var selectedEngine by remember { mutableStateOf("RULE_BASED") }
+            var apiKeyInput by remember { mutableStateOf("") }
+
+            listOf(
+                "RULE_BASED" to "Built-in Fast Rules Engine (Fast, sub-100ms, offline)",
+                "GEMINI_API" to "Google Gemini LLM (Dynamic, realistic responses with free Google API key)",
+                "LOCAL_LLM" to "On-Device Local Model (Offline Ollama / MediaPipe LLM endpoint)"
+            ).forEach { (engineKey, engineLabel) ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0x1F1E293B)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(12.dp)
+                    ) {
+                        RadioButton(
+                            selected = (selectedEngine == engineKey),
+                            onClick = { selectedEngine = engineKey },
+                            colors = RadioButtonDefaults.colors(selectedColor = PrimaryNeon)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = engineLabel,
+                            fontSize = 13.sp,
+                            color = TextPrimary
+                        )
+                    }
+                }
+            }
+
+            if (selectedEngine == "GEMINI_API") {
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedTextField(
+                    value = apiKeyInput,
+                    onValueChange = { apiKeyInput = it },
+                    label = { Text("Google Gemini API Key (aai-...)") },
+                    placeholder = { Text("Get free key at aistudio.google.com") },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryNeon,
+                        unfocusedBorderColor = TextSecondary,
+                        focusedLabelColor = PrimaryNeon,
+                        unfocusedLabelColor = TextSecondary
+                    )
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             // TTS Controls
             Text(
                 text = "Voice Pitch: ${String.format("%.2f", pitchVal)}x",
