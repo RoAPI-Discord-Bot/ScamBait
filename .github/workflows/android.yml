@@ -3,13 +3,14 @@ name: Android CI Build & Release
 on:
   push:
     branches: [ "main", "master" ]
-  pull_request:
-    branches: [ "main", "master" ]
+  workflow_dispatch:
 
 jobs:
   build:
     name: Build Android APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - name: Checkout repository
@@ -20,16 +21,38 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: gradle
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew || true
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@v4
+      with:
+        gradle-version: '8.9'
+
+    - name: Write local.properties
+      run: echo "sdk.dir=${ANDROID_SDK_ROOT}" >> local.properties
 
     - name: Build Debug APK
-      run: ./gradlew assembleDebug --no-daemon
+      run: gradle assembleDebug --stacktrace --no-daemon
 
-    - name: Upload Debug APK
+    - name: Upload Debug APK Artifact
       uses: actions/upload-artifact@v4
       with:
         name: scambait-debug-apk
         path: app/build/outputs/apk/debug/app-debug.apk
+
+    - name: Extract Version Info & Create GitHub Release
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        VERSION_NAME=$(grep "versionName =" app/build.gradle.kts | sed 's/.*"\(.*\)".*/\1/')
+        COMMIT_NOTES=$(git log -1 --pretty=format:"%s%n%n%b")
+        APK_PATH=$(ls app/build/outputs/apk/debug/*.apk 2>/dev/null | head -n 1)
+        TAG="v${VERSION_NAME}"
+        gh release delete "$TAG" --yes 2>/dev/null || true
+        git push origin ":refs/tags/$TAG" 2>/dev/null || true
+        gh release create "$TAG" \
+          --title "ScamBait $TAG" \
+          --notes "$COMMIT_NOTES" \
+          "$APK_PATH"
