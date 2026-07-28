@@ -14,7 +14,7 @@ class ScamBaitCallScreeningService : CallScreeningService() {
     override fun onScreenCall(callDetails: Call.Details) {
         val callerNumber = callDetails.handle?.schemeSpecificPart ?: ""
         val isSuspectedSpam = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-            callDetails.callerNumberVerificationStatus == Call.Details.CALLER_NUMBER_VERIFICATION_STATUS_FAILED || callerNumber.isEmpty()
+            callDetails.callerNumberVerificationStatus == 2 || callerNumber.isEmpty() // 2 = CALLER_NUMBER_VERIFICATION_STATUS_FAILED
         } else {
             callerNumber.isEmpty()
         }
