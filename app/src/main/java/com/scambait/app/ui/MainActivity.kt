@@ -54,6 +54,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private val roleLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        Log.i("MainActivity", "Call Screening role request result: ${result.resultCode}")
+    }
+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -101,6 +107,7 @@ class MainActivity : ComponentActivity() {
                             onToggleProtectContacts = { protect ->
                                 scope.launch { settingsRepository.setProtectContacts(protect) }
                             },
+                            onOpenCallScreeningRole = { requestCallScreeningRole() },
                             onNavigateToSettings = { navController.navigate("settings") },
                             onNavigateToGuide = { navController.navigate("guide") },
                             onSelectCall = { id -> navController.navigate("detail/$id") }
@@ -179,8 +186,8 @@ class MainActivity : ComponentActivity() {
             val roleManager = getSystemService(Context.ROLE_SERVICE) as RoleManager
             if (!roleManager.isRoleHeld(RoleManager.ROLE_CALL_SCREENING)) {
                 val roleIntent = roleManager.createRequestRoleIntent(RoleManager.ROLE_CALL_SCREENING)
-                startActivityForResult(roleIntent, 1001)
-                Log.i("MainActivity", "Requesting Call Screening role")
+                roleLauncher.launch(roleIntent)
+                Log.i("MainActivity", "Requesting Call Screening role via roleLauncher")
             }
         }
     }

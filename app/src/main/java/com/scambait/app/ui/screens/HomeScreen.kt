@@ -69,6 +69,7 @@ fun HomeScreen(
     recentCalls: List<CallLogEntity>,
     onToggleTrap: (Boolean) -> Unit,
     onToggleProtectContacts: (Boolean) -> Unit,
+    onOpenCallScreeningRole: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToGuide: () -> Unit,
     onSelectCall: (Long) -> Unit
@@ -96,7 +97,7 @@ fun HomeScreen(
                         color = TextPrimary
                     )
                     Text(
-                        text = "AI VoIP Call Trapper",
+                        text = "AI Call Trapper (Pixel 8a)",
                         fontSize = 14.sp,
                         color = TextSecondary
                     )
@@ -247,13 +248,7 @@ fun HomeScreen(
                             Text(text = "Allows app to catch calls before ringing", fontSize = 11.sp, color = TextSecondary)
                         }
                         Button(
-                            onClick = {
-                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                                    val roleManager = context.getSystemService(android.content.Context.ROLE_SERVICE) as? android.app.role.RoleManager
-                                    val intent = roleManager?.createRequestRoleIntent(android.app.role.RoleManager.ROLE_CALL_SCREENING)
-                                    if (intent != null) context.startActivity(intent)
-                                }
-                            },
+                            onClick = onOpenCallScreeningRole,
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0x3338BDF8)),
                             shape = RoundedCornerShape(8.dp)
                         ) {
