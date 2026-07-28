@@ -238,6 +238,13 @@ fun HomeScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
+                    val isRoleHeld = remember(context) {
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                            val roleManager = context.getSystemService(android.content.Context.ROLE_SERVICE) as? android.app.role.RoleManager
+                            roleManager?.isRoleHeld(android.app.role.RoleManager.ROLE_CALL_SCREENING) == true
+                        } else false
+                    }
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -245,14 +252,30 @@ fun HomeScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(text = "1. Call Screening Role", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-                            Text(text = "Allows app to catch calls before ringing", fontSize = 11.sp, color = TextSecondary)
+                            Text(
+                                text = if (isRoleHeld) "Active: Intercepts calls before ringing" else "Allows app to catch calls before ringing",
+                                fontSize = 11.sp,
+                                color = if (isRoleHeld) AccentEmerald else TextSecondary
+                            )
                         }
-                        Button(
-                            onClick = onOpenCallScreeningRole,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0x3338BDF8)),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(text = "Enable", color = PrimaryNeon, fontSize = 12.sp)
+                        if (isRoleHeld) {
+                            Text(
+                                text = "Granted ✅",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = AccentEmerald,
+                                modifier = Modifier
+                                    .background(AccentEmerald.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 10.dp, vertical = 6.dp)
+                            )
+                        } else {
+                            Button(
+                                onClick = onOpenCallScreeningRole,
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0x3338BDF8)),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text(text = "Enable", color = PrimaryNeon, fontSize = 12.sp)
+                            }
                         }
                     }
 
