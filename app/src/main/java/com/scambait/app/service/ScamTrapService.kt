@@ -71,6 +71,15 @@ class ScamTrapService : LifecycleService() {
         startForegroundServiceNotification()
     }
 
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
+        val callerNum = intent?.getStringExtra("CALLER_NUMBER")
+        if (!callerNum.isNullOrEmpty()) {
+            handleIncomingCall(callerNum)
+        }
+        return START_STICKY
+    }
+
     private var pendingHangUp = false
     private var isLegitimateCallerDetected = false
 
