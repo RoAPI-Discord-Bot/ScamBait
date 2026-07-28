@@ -190,9 +190,9 @@ fun HomeScreen(
                                     color = TextPrimary
                                 )
                                 Text(
-                                    text = "Never trap calls from friends or family",
+                                    text = if (protectContacts) "ON: Friends/family bypass bot • Turn OFF to test with a friend" else "OFF: Trapping enabled for ALL callers (Test Mode Active)",
                                     fontSize = 11.sp,
-                                    color = TextSecondary
+                                    color = if (protectContacts) TextSecondary else PrimaryNeon
                                 )
                             }
                         }
