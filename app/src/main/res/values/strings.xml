@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ScamBait</string>
+    <string name="accessibility_service_description">ScamBait uses accessibility to hang up calls automatically when the AI bot finishes with a scammer. It only interacts with the phone call screen.</string>
 </resources>

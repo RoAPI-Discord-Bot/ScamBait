@@ -1,6 +1,7 @@
 package com.scambait.app.ui
 
 import android.Manifest
+import android.app.role.RoleManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -58,10 +59,10 @@ class MainActivity : ComponentActivity() {
     ) { permissions ->
         val audioGranted = permissions[Manifest.permission.RECORD_AUDIO] ?: false
         if (audioGranted) {
-            // Register our VoIP-only PhoneAccount so the OS routes TextFree-forwarded calls
-            // ONLY to ScamBait — regular cellular calls are unaffected.
             ScamTrapConnectionService.registerPhoneAccount(this)
             startScamService()
+            // After other permissions granted, request call screening role
+            requestCallScreeningRole()
         }
     }
 
@@ -159,10 +160,29 @@ class MainActivity : ComponentActivity() {
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.READ_CONTACTS
         )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            permissionsToRequest.add(Manifest.permission.ANSWER_PHONE_CALLS)
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
         }
         requestPermissionLauncher.launch(permissionsToRequest.toTypedArray())
+    }
+
+    /**
+     * Requests the ROLE_CALL_SCREENING role so ScamBaitCallScreeningService
+     * can intercept calls directly on the user's personal number.
+     * No VoIP or carrier forwarding needed — works with ANY carrier.
+     */
+    private fun requestCallScreeningRole() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val roleManager = getSystemService(Context.ROLE_SERVICE) as RoleManager
+            if (!roleManager.isRoleHeld(RoleManager.ROLE_CALL_SCREENING)) {
+                val roleIntent = roleManager.createRequestRoleIntent(RoleManager.ROLE_CALL_SCREENING)
+                startActivityForResult(roleIntent, 1001)
+                Log.i("MainActivity", "Requesting Call Screening role")
+            }
+        }
     }
 
     private fun startScamService() {

@@ -51,10 +51,18 @@ import com.scambait.app.ui.theme.TextSecondary
 fun ForwardingGuideScreen(
     currentSipUri: String,
     onSaveSipUri: (String) -> Unit,
+    sipUsername: String = "",
+    sipPassword: String = "",
+    sipServer: String = "",
+    onSaveSipCredentials: (username: String, password: String, server: String) -> Unit = { _, _, _ -> },
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
     var sipAddress by remember { mutableStateOf(currentSipUri) }
+    var username by remember { mutableStateOf(sipUsername) }
+    var password by remember { mutableStateOf(sipPassword) }
+    var server by remember { mutableStateOf(sipServer) }
+
 
     Box(
         modifier = Modifier
