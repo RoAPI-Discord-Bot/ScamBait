@@ -360,12 +360,26 @@ fun CallItemCard(call: CallLogEntity, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = call.callerNumber,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = TextPrimary
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = call.callerNumber,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = TextPrimary
+                    )
+                    if (!call.isSpamConfirmed) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "REAL CALLER",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = PrimaryNeon,
+                            modifier = Modifier
+                                .background(PrimaryNeon.copy(alpha = 0.2f), RoundedCornerShape(4.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "$formattedDate • ${call.durationSeconds}s",

@@ -9,12 +9,14 @@ enum class PersonaType {
 
 enum class AiAction {
     HANG_UP,
+    LEGI_DISENGAGE,
     NONE
 }
 
 data class PersonaResponse(
     val spokenText: String,
-    val actions: List<AiAction>
+    val actions: List<AiAction>,
+    val isLegitimateCaller: Boolean = false
 )
 
 class AiPersonaEngine(
@@ -23,6 +25,21 @@ class AiPersonaEngine(
 ) {
 
     private val conversationHistory = mutableListOf<Pair<String, String>>()
+    private var legitScore = 0
+    private var turnCount = 0
+
+    private val scamKeywords = listOf(
+        "chase", "bank", "account", "social security", "department of justice",
+        "gift card", "crypto", "bitcoin", "refund", "verify code", "verification code",
+        "tech support", "virus", "computer", "microsoft", "amazon order", "wire transfer",
+        "warrant", "arrest", "irs", "customs", "urgent", "credit card", "suspicious transaction"
+    )
+
+    private val legitKeywords = listOf(
+        "happy birthday", "dinner", "lunch", "mom", "dad", "brother", "sister",
+        "doctor", "appointment", "prescription", "package delivery", "front door",
+        "picking up", "school", "kids", "garage sale", "hey it's", "this is your friend"
+    )
 
     private val margaretResponses = listOf(
         "Hello? Oh dear, is this the computer repair company? My grandson Jimmy said my mouse was frozen on a recipe for lemon square bars.",
@@ -53,7 +70,29 @@ class AiPersonaEngine(
     private var responseIndex = 0
 
     fun generateResponse(scammerInput: String): PersonaResponse {
-        conversationHistory.add("Scammer" to scammerInput)
+        conversationHistory.add("Caller" to scammerInput)
+        turnCount++
+
+        val lowerInput = scammerInput.lowercase()
+
+        // Evaluate intent scores without jumping to quick conclusions
+        if (scamKeywords.any { lowerInput.contains(it) }) {
+            legitScore = maxOf(0, legitScore - 1)
+        }
+        if (legitKeywords.any { lowerInput.contains(it) }) {
+            legitScore += 2
+        }
+
+        // If after 2+ exchanges, intent leans strongly towards legitimate non-scammer
+        if (turnCount >= 2 && legitScore >= 2) {
+            val disengageText = "Pardon me! I am an automated AI assistant called ScamBait, designed to trap scam calls. You sound like a legitimate caller! I am disconnecting now so you can reach the real line. Goodbye! [HANG_UP]"
+            conversationHistory.add("AI Persona" to disengageText)
+            return PersonaResponse(
+                spokenText = disengageText.replace("[HANG_UP]", "").trim(),
+                actions = listOf(AiAction.LEGI_DISENGAGE, AiAction.HANG_UP),
+                isLegitimateCaller = true
+            )
+        }
 
         val rawResponse = when (personaType) {
             PersonaType.MARGARET -> {
@@ -100,6 +139,9 @@ class AiPersonaEngine(
     fun resetHistory() {
         conversationHistory.clear()
         responseIndex = 0
+        legitScore = 0
+        turnCount = 0
     }
 }
+
 

@@ -7,6 +7,7 @@ import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
 import android.provider.ContactsContract
 import android.util.Log
@@ -65,12 +66,17 @@ class ScamTrapService : LifecycleService() {
     }
 
     private var pendingHangUp = false
+    private var isLegitimateCallerDetected = false
 
     private fun setupEngines() {
         sttEngine.onSpeechRecognized = { transcribedText ->
-            Log.d("ScamTrapService", "Scammer said: $transcribedText")
+            Log.d("ScamTrapService", "Caller said: $transcribedText")
             val personaResponse = aiPersonaEngine.generateResponse(transcribedText)
             Log.d("ScamTrapService", "AI response: ${personaResponse.spokenText}")
+
+            if (personaResponse.isLegitimateCaller) {
+                isLegitimateCallerDetected = true
+            }
 
             pendingHangUp = personaResponse.actions.contains(com.scambait.app.engine.AiAction.HANG_UP)
             ttsEngine.speak(personaResponse.spokenText)
@@ -99,6 +105,7 @@ class ScamTrapService : LifecycleService() {
             val pitch = settingsRepository.ttsPitch.first()
             val speed = settingsRepository.ttsSpeed.first()
 
+            isLegitimateCallerDetected = false
             aiPersonaEngine.personaType = try {
                 PersonaType.valueOf(personaName)
             } catch (e: Exception) {
@@ -132,12 +139,13 @@ class ScamTrapService : LifecycleService() {
         val transcriptJson = history.joinToString(separator = "\n") { "${it.first}: ${it.second}" }
 
         val callLog = CallLogEntity(
-            callerNumber = _currentCallerId.value.ifEmpty { "Unknown Scammer" },
+            callerNumber = _currentCallerId.value.ifEmpty { "Unknown Caller" },
             timestamp = callStartTime,
             durationSeconds = durationSec,
             transcriptJson = transcriptJson,
             audioFilePath = recordedFile?.absolutePath ?: "",
-            personaName = aiPersonaEngine.personaType.name
+            personaName = aiPersonaEngine.personaType.name,
+            isSpamConfirmed = !isLegitimateCallerDetected
         )
 
         lifecycleScope.launch {
