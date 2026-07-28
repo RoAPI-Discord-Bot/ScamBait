@@ -23,6 +23,9 @@ class SettingsRepository(private val context: Context) {
         val TTS_PITCH = floatPreferencesKey("tts_pitch")
         val TTS_SPEED = floatPreferencesKey("tts_speed")
         val SIP_URI = stringPreferencesKey("sip_uri")
+        val SIP_USERNAME = stringPreferencesKey("sip_username")
+        val SIP_SERVER = stringPreferencesKey("sip_server")
+        val SIP_PASSWORD = stringPreferencesKey("sip_password")
     }
 
     val isTrapActive: Flow<Boolean> = context.dataStore.data.map { prefs ->
@@ -53,6 +56,18 @@ class SettingsRepository(private val context: Context) {
         prefs[SIP_URI] ?: "scamtrap_bot@sip.scambaiter.net"
     }
 
+    val sipUsername: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[SIP_USERNAME] ?: ""
+    }
+
+    val sipServer: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[SIP_SERVER] ?: ""
+    }
+
+    val sipPassword: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[SIP_PASSWORD] ?: ""
+    }
+
     suspend fun setTrapActive(active: Boolean) {
         context.dataStore.edit { prefs -> prefs[IS_TRAP_ACTIVE] = active }
     }
@@ -78,5 +93,13 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setSipUri(uri: String) {
         context.dataStore.edit { prefs -> prefs[SIP_URI] = uri }
+    }
+
+    suspend fun setSipCredentials(username: String, server: String, pass: String) {
+        context.dataStore.edit { prefs ->
+            prefs[SIP_USERNAME] = username
+            prefs[SIP_SERVER] = server
+            prefs[SIP_PASSWORD] = pass
+        }
     }
 }

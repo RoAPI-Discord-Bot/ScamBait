@@ -39,6 +39,7 @@ class ScamTrapService : LifecycleService() {
     private lateinit var ttsEngine: TtsEngine
     private lateinit var aiPersonaEngine: AiPersonaEngine
     private lateinit var callRecorder: CallRecorder
+    private lateinit var sipManager: com.scambait.app.engine.SipManager
 
     private val _isCallActive = MutableStateFlow(false)
     val isCallActive: StateFlow<Boolean> = _isCallActive
@@ -60,6 +61,11 @@ class ScamTrapService : LifecycleService() {
         ttsEngine = TtsEngine(this)
         aiPersonaEngine = AiPersonaEngine()
         callRecorder = CallRecorder(this)
+        sipManager = com.scambait.app.engine.SipManager(this)
+
+        sipManager.onIncomingCall = { incomingNumber ->
+            handleIncomingCall(incomingNumber)
+        }
 
         setupEngines()
         startForegroundServiceNotification()
