@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate()
+        super.onCreate(savedInstanceState)
         settingsRepository = SettingsRepository(this)
 
         // Start & Bind Service

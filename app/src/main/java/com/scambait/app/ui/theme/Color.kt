@@ -2,7 +2,7 @@ package com.scambait.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val DarkBg = Color(0F121C2D)
+val DarkBg = Color(0xFF0F172A)
 val CardSurface = Color(0x1F1E293B)
 val GlassBorder = Color(0x33FFFFFF)
 val PrimaryNeon = Color(0xFF38BDF8)
