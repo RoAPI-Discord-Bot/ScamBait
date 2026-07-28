@@ -141,7 +141,7 @@ class SipManager(private val context: Context) {
                     activeCall = null
                     onCallEnded?.invoke()
                 }
-            }, 30) // 30s ring timeout before auto-decline
+            }, true)
 
             // Answer immediately — no ringing
             incomingCall.answerCall(30)

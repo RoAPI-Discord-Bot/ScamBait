@@ -13,10 +13,11 @@ class ScamBaitCallScreeningService : CallScreeningService() {
 
     override fun onScreenCall(callDetails: Call.Details) {
         val callerNumber = callDetails.handle?.schemeSpecificPart ?: ""
-        val verificationStatus = callDetails.callerNumberVerificationStatus
-
-        val isSuspectedSpam = verificationStatus == Call.Details.VERIFICATION_STATUS_FAILED ||
-                callerNumber.isEmpty()
+        val isSuspectedSpam = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            callDetails.callerNumberVerificationStatus == Call.Details.CALLER_NUMBER_VERIFICATION_STATUS_FAILED || callerNumber.isEmpty()
+        } else {
+            callerNumber.isEmpty()
+        }
 
         Log.i("ScamBaitCallScreening", "Screening call from: $callerNumber | spam=$isSuspectedSpam")
 
